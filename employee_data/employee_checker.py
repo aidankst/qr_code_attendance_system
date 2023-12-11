@@ -1,37 +1,42 @@
 import cv2
 from datetime import datetime
-from firebase_admin import db
+from firebase_admin import db, initialize_app, credentials
 
 timelimit = 15
+
+
 def check_employee_name(qr_code_data):
-    # Assuming the database structure is '/employees/{employee_id}'
-    employees_ref = db.reference('employees')
+    qr_code_parts = qr_code_data.split(', ')
+    
+    if len(qr_code_parts) == 3:
+        qr_id, qr_name, qr_position = qr_code_parts
+        qr_id = qr_id.strip()
 
-    for employee_id in employees_ref.get():
-        employee = employees_ref.child(employee_id).get()
-        stored_name = employee.get('name', '').strip().lower()
+        employees_ref = db.reference('employees')
+        employee = employees_ref.child(qr_id).get()
 
-        # Extract name from QR code data
-        qr_code_lines = qr_code_data.split('\n')
-        if len(qr_code_lines) > 0:
-            qr_code_name_parts = qr_code_lines[0].split(': ')
-            if len(qr_code_name_parts) > 1:
-                qr_code_name = qr_code_name_parts[1].strip().lower()
+        if employee:
+            stored_name = employee.get('name', '').strip().lower()
+            stored_position = employee.get('position', '').strip().lower()
 
-                if stored_name == qr_code_name:
-                    datetimeObject = datetime.strptime(employee['last_attendance_time'], "%Y-%m-%d %H:%M:%S")
-                    secondsElapsed = (datetime.now() - datetimeObject).total_seconds()
+            print(f"QR ID: {qr_id}, QR Name: {qr_name}, QR Position: {qr_position}")
+            print(f"Stored Name: {stored_name}, Stored Position: {stored_position}")
 
-                    if secondsElapsed > timelimit:
-                        total = employee.get('total_attendance', 0) + 1
-                        employees_ref.child(employee_id).update({
-                            'attendance': total,
-                            'last_attendance_time': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                        })
+            if 'last_attendance_time' in employee:
+                datetimeObject = datetime.strptime(employee['last_attendance_time'], "%Y-%m-%d %H:%M:%S")
+                secondsElapsed = (datetime.now() - datetimeObject).total_seconds()
 
-                    return True
+                if secondsElapsed > timelimit:
+                    total = employee.get('total_attendance', 0) + 1
+                    employees_ref.child(qr_id).update({
+                        'total_attendance': total,
+                        'last_attendance_time': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    })
+                    print("Attendance Updated!")
 
-    return False
+                return True
+        return True
+
 
 def check_qr_codes_from_camera():
     camera = cv2.VideoCapture(0)  # Use 0 for the default camera
@@ -64,4 +69,5 @@ def check_qr_codes_from_camera():
     camera.release()
     cv2.destroyAllWindows()
 
-
+if __name__ == "__main__":
+    check_qr_codes_from_camera()
