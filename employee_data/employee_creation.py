@@ -1,6 +1,7 @@
+import os
 import qrcode
-# from firebase_admin import initialize_app, db, credentials
-#
+from firebase_admin import db
+
 # cred = credentials.Certificate('/Users/sithukaung/Library/CloudStorage/GoogleDrive-aidan.kst@icloud.com/My Drive/AGH/5th Semester/Software Studio/QR Attendance/employee_data/serviceAccountKey.json')
 # firebase_app = initialize_app(cred, {
 #     'databaseURL': 'https://orderingsystem-dbe5b.firebaseio.com'
@@ -25,11 +26,14 @@ def add_employee():
         employee_ref.set(employee_data)
 
         # Create qr code
-        img = qrcode.make(f'Employee ID: {id},Employee Name: {name},Employee Position: {position}')
-        img.save(f'qr_codes/{id}.png')
+        if not os.path.exists('qr_codes'):
+            os.mkdir('qr_codes')
+        else:
+            img = qrcode.make(f'Employee ID: {id},Employee Name: {name},Employee Position: {position}')
+            img.save(f'qr_codes/{id}.png')
 
         print("Employee data has been saved to database.")
 
-if __name__ == '__main__':
-    # add_employee('John Doe', '12345', 'Software Engineer')
-    add_employee()
+# if __name__ == '__main__':
+#     # add_employee('John Doe', '12345', 'Software Engineer')
+#     add_employee()

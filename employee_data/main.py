@@ -6,7 +6,7 @@ from firebase_admin import initialize_app, db, credentials
 
 cred = credentials.Certificate('/Users/sithukaung/Library/CloudStorage/GoogleDrive-aidan.kst@icloud.com/My Drive/AGH/5th Semester/Software Studio/QR Attendance/employee_data/serviceAccountKey.json')
 firebase_app = initialize_app(cred, {
-    'databaseURL': 'https://orderingsystem-dbe5b.firebaseio.com'
+    'databaseURL': 'https://orderingsystem-dbe5b-default-rtdb.europe-west1.firebasedatabase.app'
 })
 
 
