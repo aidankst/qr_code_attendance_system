@@ -1,5 +1,5 @@
 from employee_creation import add_employee
-from employee_checker import verify_employee_data
+from employee_checker import check_qr_codes_from_camera
 from employee_deleter import delete_employee
 
 from firebase_admin import initialize_app, db, credentials
@@ -18,9 +18,10 @@ def initiator():
         
         match temp:
             case '1': add_employee()
-            case '2': verify_employee_data()
+            case '2': check_qr_codes_from_camera()
             case '3': delete_employee()
             case '4': condition = False
 
 if __name__ == "__main__":
     initiator()
+    

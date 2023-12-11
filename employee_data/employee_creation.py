@@ -28,9 +28,8 @@ def add_employee():
         # Create qr code
         if not os.path.exists('qr_codes'):
             os.mkdir('qr_codes')
-        else:
-            img = qrcode.make(f'Employee ID: {id},Employee Name: {name},Employee Position: {position}')
-            img.save(f'qr_codes/{id}.png')
+        img = qrcode.make(f'{id}, {name}, {position}')
+        img.save(f'/Users/sithukaung/Library/CloudStorage/GoogleDrive-aidan.kst@icloud.com/My Drive/AGH/5th Semester/Software Studio/QR Attendance/employee_data/qr_codes/{id}.png')
 
         print("Employee data has been saved to database.")
 

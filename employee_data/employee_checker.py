@@ -1,94 +1,67 @@
-import datetime
 import cv2
+from datetime import datetime
 from firebase_admin import db
 
-# cred = credentials.Certificate("/path/to/serviceAccountKey.json")
-# firebase_admin.initialize_app(cred, {
-#     'databaseURL': "https://your-project-id.firebaseio.com/"
-# })
+timelimit = 15
+def check_employee_name(qr_code_data):
+    # Assuming the database structure is '/employees/{employee_id}'
+    employees_ref = db.reference('employees')
 
-timelimit=15
+    for employee_id in employees_ref.get():
+        employee = employees_ref.child(employee_id).get()
+        stored_name = employee.get('name', '').strip().lower()
 
-def decode_qr_code(image):
-    # Initialize the QR code decoder
-    qr_decoder = cv2.QRCodeDetector()
+        # Extract name from QR code data
+        qr_code_lines = qr_code_data.split('\n')
+        if len(qr_code_lines) > 0:
+            qr_code_name_parts = qr_code_lines[0].split(': ')
+            if len(qr_code_name_parts) > 1:
+                qr_code_name = qr_code_name_parts[1].strip().lower()
 
-    # Define a ROI (Region of Interest) to focus the search for QR codes
-    roi = image[200:300, 300:400]
+                if stored_name == qr_code_name:
+                    datetimeObject = datetime.strptime(employee['last_attendance_time'], "%Y-%m-%d %H:%M:%S")
+                    secondsElapsed = (datetime.now() - datetimeObject).total_seconds()
 
-    gray_roi = None
-    # Check if the ROI is empty before converting it to grayscale
-    if roi is None or roi.size == 0:
-        # Handle the empty ROI
-        print("Empty ROI detected.")
-    else:
-        # Check if the input image has three channels before converting it to grayscale
-        if roi.ndim != 3:
-            # Handle the multi-channel image
-            print("Input image has more than three channels.")
-        else:
-            # Convert the ROI to grayscale
-            gray_roi = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
+                    if secondsElapsed > timelimit:
+                        total = employee.get('total_attendance', 0) + 1
+                        employees_ref.child(employee_id).update({
+                            'attendance': total,
+                            'last_attendance_time': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                        })
 
-    # Iterate through the ROI pixels to find QR codes
-        for x in range(gray_roi.shape[1]):
-            for y in range(gray_roi.shape[0]):
-            # Check if the current pixel value indicates a QR code module
-                if gray_roi[y, x] == 0:
-                # If a QR code module is detected, try decoding the QR code data
-                    potential_qr_code = gray_roi[y-2:y+3, x-2:x+3]
-                    if qr_decoder.decode(potential_qr_code):
-                    # Extract the decoded QR code data
-                        decoded_text = qr_decoder.decode_data(potential_qr_code).decode('utf-8').split(',')
-                        return decoded_text
+                    return True
 
-def update_attendance(employee_data):
-    # Split the employee data into parts
-    employee_id = employee_data[0]
+    return False
 
-    # Get the employee data from the firebase database
-    employeeinfo = db.reference(f"Employees/{employee_id}").get()
-    ref = db.reference(f"Employees/{employee_id}")
-
-    datetimeObject = datetime.strptime(employeeinfo['last_attendance_time'],
-                                       "%Y-%m-%d %H:%M:%S")
-    secondsElapsed = (datetime.now() - datetimeObject).total_seconds()
-
-    if secondsElapsed > timelimit:
-        total = employeeinfo['total_attendance'] + 1
-        ref.child('total_attendance').set(total)
-        ref.child('last_attendance_time').set(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-
-def verify_employee_data():
-    # Start capturing the camera feed
-    camera = cv2.VideoCapture(0)
+def check_qr_codes_from_camera():
+    camera = cv2.VideoCapture(0)  # Use 0 for the default camera
+    qr_detector = cv2.QRCodeDetector()
 
     while True:
-        # Capture each frame
         ret, frame = camera.read()
 
-        # Get the ROI for the QR code detection
-        roi = frame[200:300, 300:400]
+        if ret:
+            gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            retval, decoded_info, _, _ = qr_detector.detectAndDecodeMulti(gray_frame)
 
-        # Convert the ROI to grayscale
-        gray_roi = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
+            if retval:
+                for qr_code_data in decoded_info:
+                    qr_code_data = qr_code_data.strip()
+                    print(f"QR Code Data: {qr_code_data}")
 
-        # Check for QR codes within the ROI
-        employee_data = decode_qr_code(gray_roi)
+                    is_employee = check_employee_name(qr_code_data)
 
-        # Update attendance if the employee is verified
-        if employee_data:
-            for decoded_text in employee_data:
-                update_attendance(decoded_text)
-                print("Attendance marked successfully for employee ID:", decoded_text[0])
+                    if is_employee:
+                        print("The QR code corresponds to an employee in the Firebase database.")
+                    else:
+                        print("The QR code does not match any employee in the Firebase database.")
 
-        # Display the frame
-        cv2.imshow('QR Code Scanner', frame)
+            cv2.imshow("QR Code Scanner", frame)
 
-        # Stop the loop when the 'q' key is pressed
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
 
-    # Release the camera and close the output window
     camera.release()
     cv2.destroyAllWindows()
+
+
