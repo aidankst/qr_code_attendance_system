@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Check Employee</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>Check Employee</h1>
+    <form action="/check_employee" method="post">
+        QR Code Data: <input type="text" name="qr_code_data"><br>
+        <input type="submit" value="Check">
+    </form>
+</body>
+</html>

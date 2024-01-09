@@ -1,6 +1,6 @@
 import cv2
 from datetime import datetime
-from firebase_admin import db, initialize_app, credentials
+from firebase_admin import db
 
 timelimit = 15
 

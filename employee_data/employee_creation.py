@@ -7,14 +7,14 @@ from firebase_admin import db
 #     'databaseURL': 'https://orderingsystem-dbe5b.firebaseio.com'
 # })
 
-def add_employee():
+def add_employee(name, id, position):
 
     while True:
-        name = input("Enter employee name (or 'exit' to finish): ")
-        if name.lower() == 'exit':
-            break
-        id = str(input("Enter employee ID: "))
-        position = input("Enter employee position: ")
+        # name = input("Enter employee name (or 'exit' to finish): ")
+        # if name.lower() == 'exit':
+        #     break
+        # id = str(input("Enter employee ID: "))
+        # position = input("Enter employee position: ")
 
         employee_data = {
             'name': name,

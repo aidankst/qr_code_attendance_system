@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Delete Employee</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>Delete Employee</h1>
+    <form action="/delete_employee" method="post">
+        Employee ID: <input type="text" name="id"><br>
+        <input type="submit" value="Delete">
+    </form>
+</body>
+</html>
