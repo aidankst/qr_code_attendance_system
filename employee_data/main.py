@@ -28,23 +28,23 @@ def initiator():
 def index():
     return render_template('index.html')
 
-@app.route('/create_employee', methods=['POST'])
+@app.route('/employee_data/templates/create_employee.html', methods=['POST', 'GET'])
 def create_employee():
-    name = request.form['name']
-    id = request.form['id']
-    position = request.form['position']
+    name = request.form.get('name')
+    id = request.form.get('id')
+    position = request.form.get('position')
     add_employee(name, id, position)
     return jsonify({"message": "Employee created successfully"})
 
-@app.route('/check_employee', methods=['POST'])
+@app.route('/employee_data/templates/check_employee.html', methods=['POST', 'GET'])
 def check_employee():
     qr_code_data = request.form['qr_code_data']
     attendance = check_employee_name(qr_code_data)
     return jsonify({"attendance": attendance})
 
-@app.route('/delete_employee', methods=['POST'])
+@app.route('/employee_data/templates/delete_employee.html', methods=['POST', 'GET'])
 def remove_employee():
-    employee_id = request.form['id']
+    employee_id = request.form.get('id')
     delete_employee(employee_id)
     return jsonify({"message": "Employee deleted successfully"})
 
