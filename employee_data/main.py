@@ -19,7 +19,7 @@ def initiator():
         temp = input ("Choose the input \n 1. Employee Creator \n 2. Employee Checker \n 3. Employee Deleter \n 4. quit\n " )
         
         match temp:
-            case '1': add_employee()
+            case '1': add_employee("Kaung Sithu", "414175", "Manager")
             case '2': check_qr_codes_from_camera()
             case '3': delete_employee()
             case '4': condition = False
@@ -49,9 +49,14 @@ def check_employee():
 
 @app.route('/delete_employee', methods=['GET'])
 def remove_employee():
-    employee_id = request.form.get('id')
-    delete_employee(employee_id)
-    return render_template('delete_employee.html')
+    try:
+        employee_id = request.args.get("employee_id")
+        result = delete_employee(employee_id)
+        # return jsonify({'success': True, 'result': result})
+        return render_template('delete_employee.html')
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
 
 if __name__ == '__main__':
     app.run(debug=True)
+    # initiator()

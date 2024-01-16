@@ -13,7 +13,7 @@ def add_employee(name, id, position):
             'last_attendance_time': "2022-01-01 12:00:00",
             'total_attendance': 0
         }
-        employee_ref = db.reference('employees').child(id)
+        employee_ref = db.reference('Employees').child(id)
         employee_ref.set(employee_data)
 
         qr_code_path = os.path.join(os.path.dirname(__file__), 'employee_data', 'static', 'qr_codes', f'{id}.png')
