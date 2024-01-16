@@ -2,7 +2,6 @@ from firebase_admin import db
 
 def delete_employee(employee_id):
     try:
-        # employee_id = input("Enter the employee id you would like to delete: ")
         employee_ref = db.reference('employees').child(employee_id)
         employee_data = employee_ref.get()
 

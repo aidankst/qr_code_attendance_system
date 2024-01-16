@@ -28,25 +28,30 @@ def initiator():
 def index():
     return render_template('index.html')
 
-@app.route('/employee_data/templates/create_employee.html', methods=['POST', 'GET'])
+@app.route('/create_employee', methods=['GET'])
 def create_employee():
     name = request.form.get('name')
     id = request.form.get('id')
     position = request.form.get('position')
-    add_employee(name, id, position)
-    return jsonify({"message": "Employee created successfully"})
+    if name and id and position:  # Check if name, id, and position are not None
+        add_employee(name, id, position)
+    else:
+        return "Error: Missing form data", 400  # Return an error response
+    return render_template('create_employee.html')
 
-@app.route('/employee_data/templates/check_employee.html', methods=['POST', 'GET'])
+@app.route('/check_employee', methods=['GET'])
 def check_employee():
-    qr_code_data = request.form['qr_code_data']
+    data = request.get_json()
+    qr_code_data = data.get('qr_code_data')
     attendance = check_employee_name(qr_code_data)
     return jsonify({"attendance": attendance})
+    # return render_template('check_employee.html')
 
-@app.route('/employee_data/templates/delete_employee.html', methods=['POST', 'GET'])
+@app.route('/delete_employee', methods=['GET'])
 def remove_employee():
     employee_id = request.form.get('id')
     delete_employee(employee_id)
-    return jsonify({"message": "Employee deleted successfully"})
+    return render_template('delete_employee.html')
 
 if __name__ == '__main__':
     app.run(debug=True)

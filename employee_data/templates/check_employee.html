@@ -1,14 +1,70 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>Check Employee</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://rawgit.com/schmich/instascan-builds/master/instascan.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 </head>
 <body>
-    <h1>Check Employee</h1>
-    <form action="/check_employee" method="GET">
-        QR Code Data: <input type="text" name="qr_code_data"><br>
-        <input type="submit" value="Check">
-    </form>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <a class="navbar-brand" href="#">QR Attendance System</a>
+    <ul class="navbar-nav ml-auto">
+        <li class="nav-item">
+            <a class="nav-link" href="/">Home</a>
+        </li>
+    </ul>
+</nav>
+
+<div class="container mt-4">
+    <h2>Check Employee</h2>
+    
+    <!-- Container for video stream -->
+    <div id="video-container">
+        <video id="preview"></video>
+    </div>
+
+    <script>
+        // Initialize camera and QR code scanning
+        let scanner = new Instascan.Scanner({ video: document.getElementById('preview') });
+        scanner.addListener('scan', function (content) {
+            // Handle the scanned QR code content here
+            alert('Scanned content: ' + content);
+
+            // Send the scanned content to the Flask server
+            $.ajax({
+                type: "GET", // Change the request method to POST
+                url: "/check_employee", // Update the route to handle POST requests
+                contentType: "application/json", // Set the Content-Type to JSON
+                data: JSON.stringify({ qr_code_data: content }),
+                success: function(response) {
+                    // Handle the response if needed
+                    console.log(response);
+                },
+                error: function(error) {
+                    console.error(error);
+                }
+            });
+        });
+
+        // Start camera when the page is clicked
+        document.getElementById('video-container').addEventListener('click', function () {
+            Instascan.Camera.getCameras().then(function (cameras) {
+                if (cameras.length > 0) {
+                    scanner.start(cameras[0]);
+                } else {
+                    console.error('No cameras found.');
+                }
+            }).catch(function (e) {
+                console.error(e);
+            });
+        });
+    </script>
+</div>
+
 </body>
 </html>

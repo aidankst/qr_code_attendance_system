@@ -1,14 +1,35 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>Delete Employee</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <h1>Delete Employee</h1>
-    <form action="/delete_employee" method="GET">
-        Employee ID: <input type="text" name="id"><br>
-        <input type="submit" value="Delete">
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <a class="navbar-brand" href="#">QR Attendance System</a>
+    <ul class="navbar-nav ml-auto">
+        <li class="nav-item">
+            <a class="nav-link" href="/">Home</a>
+        </li>
+    </ul>
+</nav>
+
+<div class="container mt-4">
+    <h2>Delete Employee</h2>
+    
+    <form method="GET" action="/delete_employee">
+        <div class="form-group">
+            <label for="employee_id">Employee ID:</label>
+            <input type="text" class="form-control" id="employee_id" name="employee_id" required>
+        </div>
+        <button type="submit" class="btn btn-danger">Delete Employee</button>
     </form>
+    
+</div>
+
 </body>
 </html>
