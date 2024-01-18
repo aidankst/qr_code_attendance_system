@@ -13,10 +13,9 @@ def add_employee(name, id, position):
     }
     employee_ref = db.reference('employees').child(id)
     employee_ref.set(employee_data)
-
-        # qr_code_path = os.path.join(os.path.dirname(__file__), 'employee_data', 'static', 'qr_codes', f'{id}.png')
+    
     img = qrcode.make(f'{id}, {name}, {position}')
-    img.save(f'/Users/sithukaung/Library/CloudStorage/GoogleDrive-aidan.kst@icloud.com/My Drive/AGH/5th Semester/Software Studio/QR Attendance/employee_data/static/qr_codes/{id}.png')
+    img.save(f'employee_data/static/qr_codes/{id}.png')
 
     print("Employee data has been saved to database.")
 

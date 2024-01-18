@@ -7,10 +7,9 @@ from datetime import datetime
 
 app = Flask(__name__)
 
-cred = credentials.Certificate('/Users/sithukaung/Library/CloudStorage/GoogleDrive-aidan.kst@icloud.com/My Drive/AGH/5th Semester/Software Studio/QR Attendance/employee_data/serviceAccountKeyUpdated.json')
+cred = credentials.Certificate('employee_data/serviceAccountKeyUpdated.json')
 firebase_app = initialize_app(cred, {
-    'databaseURL': 'https://employee-attendance-syst-4e7a6-default-rtdb.firebaseio.com' ## ServiceAccountKeyUpdated
-    # 'databaseURL': 'https://orderingsystem-dbe5b-default-rtdb.europe-west1.firebasedatabase.app' ## serviceAccountKey
+    'databaseURL': 'https://employee-attendance-syst-4e7a6-default-rtdb.firebaseio.com' 
 })
 
 timelimit = 15
