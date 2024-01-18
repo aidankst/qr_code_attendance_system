@@ -1,17 +1,19 @@
 from employee_creation import add_employee
 from employee_checker import check_qr_codes_from_camera, check_employee_name
 from employee_deleter import delete_employee
-from firebase_admin import initialize_app, credentials
+from firebase_admin import initialize_app, credentials, db
 from flask import Flask, flash, redirect, render_template, request, jsonify
+from datetime import datetime
 
 app = Flask(__name__)
 
 cred = credentials.Certificate('/Users/sithukaung/Library/CloudStorage/GoogleDrive-aidan.kst@icloud.com/My Drive/AGH/5th Semester/Software Studio/QR Attendance/employee_data/serviceAccountKeyUpdated.json')
 firebase_app = initialize_app(cred, {
-    'databaseURL': 'https://employee-attendance-syst-4e7a6-default-rtdb.firebaseio.com'
+    'databaseURL': 'https://employee-attendance-syst-4e7a6-default-rtdb.firebaseio.com' ## ServiceAccountKeyUpdated
+    # 'databaseURL': 'https://orderingsystem-dbe5b-default-rtdb.europe-west1.firebasedatabase.app' ## serviceAccountKey
 })
 
-
+timelimit = 15
 def initiator():
     condition = True
 
@@ -19,7 +21,7 @@ def initiator():
         temp = input ("Choose the input \n 1. Employee Creator \n 2. Employee Checker \n 3. Employee Deleter \n 4. quit\n " )
         
         match temp:
-            case '1': add_employee("Kaung Sithu", "414175", "Manager")
+            case '1': add_employee("Min", "003", "Student")
             case '2': check_qr_codes_from_camera()
             case '3': delete_employee()
             case '4': condition = False
@@ -30,22 +32,59 @@ def index():
 
 @app.route('/create_employee', methods=['GET'])
 def create_employee():
-    name = request.form.get('name')
-    id = request.form.get('id')
-    position = request.form.get('position')
-    if name and id and position:  # Check if name, id, and position are not None
-        add_employee(name, id, position)
-    else:
-        return "Error: Missing form data", 400  # Return an error response
-    return render_template('create_employee.html')
+    try:
+        name = request.args.get('name')
+        id = request.args.get('id')
+        position = request.args.get('position')
+        if name and id and position:  # Check if name, id, and position are not None
+            add_employee(name, id, position)
+        elif name:
+            return "Error: Only name present"
+        elif id:
+            return "Error: Only id present"
+        elif position:
+            return "Error: Only position present"
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+    return render_template('/create_employee.html')
 
-@app.route('/check_employee', methods=['GET'])
+@app.route('/check_employee')
 def check_employee():
-    data = request.get_json()
-    qr_code_data = data.get('qr_code_data')
-    attendance = check_employee_name(qr_code_data)
-    return jsonify({"attendance": attendance})
-    # return render_template('check_employee.html')
+    qr_code_data = request.args.get('qr_code_data', '')
+    
+    if qr_code_data:
+        qr_code_parts = qr_code_data.split(', ')
+        if len(qr_code_parts) == 3:
+            qr_id, qr_name, qr_position = qr_code_parts
+            qr_id = qr_id.strip()
+
+            employees_ref = db.reference('employees')
+            employee = employees_ref.child(qr_id).get()
+
+            if employee:
+                stored_name = employee.get('name', '').strip().lower()
+                stored_position = employee.get('position', '').strip().lower()
+
+                if 'last_attendance_time' in employee:
+                    datetime_object = datetime.strptime(employee['last_attendance_time'], "%Y-%m-%d %H:%M:%S")
+                    seconds_elapsed = (datetime.now() - datetime_object).total_seconds()
+
+                    if seconds_elapsed > timelimit:
+                        total = employee.get('total_attendance', 0) + 1
+                        employees_ref.child(qr_id).update({
+                            'total_attendance': total,
+                            'last_attendance_time': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                        })
+                        return jsonify({'is_employee': True, 'message': 'Attendance Updated!'})
+                    else:
+                        return jsonify({'is_employee': True, 'message': 'Attendance not updated. Time limit not reached.'})
+                else:
+                    return jsonify({'is_employee': True, 'message': 'Employee has no attendance record.'})
+            else:
+                return jsonify({'is_employee': False, 'message': 'QR code does not match any employee in the database.'})
+
+    return jsonify({'is_employee': False, 'message': 'Invalid QR code data.'})
+
 
 @app.route('/delete_employee', methods=['GET'])
 def remove_employee():
