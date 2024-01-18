@@ -48,9 +48,9 @@ def create_employee():
         return jsonify({'success': False, 'error': str(e)})
     return render_template('/create_employee.html')
 
-@app.route('/check_employee')
+@app.route('/check_employee', methods=['POST', 'GET'])
 def check_employee():
-    qr_code_data = request.args.get('qr_code_data', '')
+    qr_code_data = request.args.get('qr_code_data')
     
     if qr_code_data:
         qr_code_parts = qr_code_data.split(', ')
@@ -64,6 +64,9 @@ def check_employee():
             if employee:
                 stored_name = employee.get('name', '').strip().lower()
                 stored_position = employee.get('position', '').strip().lower()
+
+                print(f"QR ID: {qr_id}, QR Name: {qr_name}, QR Position: {qr_position}")
+                print(f"Stored Name: {stored_name}, Stored Position: {stored_position}")
 
                 if 'last_attendance_time' in employee:
                     datetime_object = datetime.strptime(employee['last_attendance_time'], "%Y-%m-%d %H:%M:%S")
@@ -83,7 +86,7 @@ def check_employee():
             else:
                 return jsonify({'is_employee': False, 'message': 'QR code does not match any employee in the database.'})
 
-    return jsonify({'is_employee': False, 'message': 'Invalid QR code data.'})
+    return render_template('/check_employee.html')
 
 
 @app.route('/delete_employee', methods=['GET'])

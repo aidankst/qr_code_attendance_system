@@ -6,7 +6,9 @@ timelimit = 15
 
 
 def check_employee_name(qr_code_data):
-    qr_code_parts = qr_code_data.split(', ')
+    qr_code_parts = ""
+    if qr_code_data:
+        qr_code_parts = qr_code_data.split(', ')
     
     if len(qr_code_parts) == 3:
         qr_id, qr_name, qr_position = qr_code_parts
